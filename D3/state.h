@@ -9,7 +9,7 @@ struct state {
     struct queue* queue;
     struct student** students;
     struct ta* ta;
-}
+};
 
 struct state* newState();
 

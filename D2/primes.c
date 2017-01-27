@@ -48,12 +48,14 @@ int main(int argc, char* argv[]) {
     int result = pthread_create(&thread, NULL, primes, &num);
     if(result != 0) {
         fprintf(stderr, "Error creating thread.\n");
+        exit(EXIT_FAILURE);
     }
 
     // join thread
     result = pthread_join(thread, NULL);
     if(result != 0) {
         fprintf(stderr, "Error joining thread.\n");
+        exit(EXIT_FAILURE);
     }
 
     return 0;

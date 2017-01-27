@@ -1,6 +1,7 @@
 #include "queue.h"
 
 #include <pthread.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "student.h"
@@ -11,31 +12,31 @@ struct queue* newQueue() {
     memset(q, 0, sizeof(struct queue));
     q->head = 0;
     q->tail = 0;
-    q->mutex = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_init(&q->mutex, NULL);
 
     return q;
 }
 
 // add s to the queue, return false if queue is full
-int add(struct queue* this, struct student* s) {
+int enqueue(struct queue* this, struct student* s) {
     int added = 0;
-    pthread_mutex_lock(this->mutex);
+    pthread_mutex_lock(&this->mutex);
 
     if(this->list[this->tail] == NULL) {
         this->list[this->tail] = s;
         this->tail = (this->tail + 1) % Q_MAX;
 
-        return 1;
+        added = 1;
     }
 
-    pthread_mutex_unlock(this->mutex);
+    pthread_mutex_unlock(&this->mutex);
     return added;
 }
 
 // remove student from the queue, return NULL if queue is empty
-struct student* remove(struct queue* this) {
+struct student* dequeue(struct queue* this) {
     struct student* s = NULL;
-    pthread_mutex_lock(this->mutex);
+    pthread_mutex_lock(&this->mutex);
 
     if(this->list[this->head] != NULL) {
         s = this->list[this->head];
@@ -43,7 +44,7 @@ struct student* remove(struct queue* this) {
         this->head = (this->head + 1) % Q_MAX;
     }
 
-    pthread_mutex_unlock(mutex);
+    pthread_mutex_unlock(&this->mutex);
     return s;
 }
 

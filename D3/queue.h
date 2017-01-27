@@ -1,7 +1,8 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
-#include "queue.h"
+#include <pthread.h>
+
 #include "student.h"
 
 #define Q_MAX 3
@@ -11,13 +12,13 @@ struct queue {
     int head;
     int tail;
     pthread_mutex_t mutex;
-}
+};
 
 struct queue* newQueue();
 
-int add(struct queue* this, struct student* s);
+int enqueue(struct queue* this, struct student* s);
 
-struct student* remove(struct queue* this);
+struct student* dequeue(struct queue* this);
 
 struct student* head(struct queue* this);
 

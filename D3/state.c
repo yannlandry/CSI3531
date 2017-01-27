@@ -1,5 +1,6 @@
 #include "state.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 struct state* newState() {
