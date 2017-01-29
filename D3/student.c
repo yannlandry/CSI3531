@@ -62,3 +62,9 @@ void* studentThread(void* arg) {
     free(data);
     return NULL;
 }
+
+void destroyStudent(struct student* this) {
+    if(this != NULL) {
+        free(this);
+    }
+}

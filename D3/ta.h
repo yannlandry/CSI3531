@@ -16,4 +16,6 @@ struct ta* newTA();
 
 void* taThread(void* arg);
 
+void destroyTA(struct ta* this);
+
 #endif

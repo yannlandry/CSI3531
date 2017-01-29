@@ -52,3 +52,12 @@ struct student* dequeue(struct queue* this) {
 struct student* head(struct queue* this) {
     return this->list[this->head];
 }
+
+// free memory, delete everything
+void destroyQueue(struct queue* this) {
+    if(this != NULL) {
+        free(this->list);
+        pthread_mutex_destroy(&this->mutex);
+        free(this);
+    }
+}

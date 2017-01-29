@@ -46,6 +46,8 @@ void taExecute(struct state* state) {
         printf("[%s] There are no more students waiting for help. The TA can now go back to sleep.\n", gen_time(timebuf));
         this->status = SLEEPING;
     }
+
+    printf("[%s] All right kids, that's it for today! Your TA is tired now...\n", gen_time(timebuf));
 }
 
 void* taThread(void* arg) {
@@ -53,4 +55,11 @@ void* taThread(void* arg) {
     taExecute(state);
 
     return NULL;
+}
+
+void destroyTA(struct ta* this) {
+    if(this != NULL) {
+        sem_destroy(&this->semaphore);
+        free(this);
+    }
 }

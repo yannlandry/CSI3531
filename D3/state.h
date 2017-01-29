@@ -7,10 +7,13 @@
 
 struct state {
     struct queue* queue;
-    struct student** students;
     struct ta* ta;
+    struct student** students;
+    int num_students;
 };
 
 struct state* newState();
+
+void destroyState(struct state* this);
 
 #endif

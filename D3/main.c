@@ -1,5 +1,6 @@
 #include <pthread.h>
 #include <semaphore.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,15 +9,24 @@
 #include "student.h"
 #include "ta.h"
 
-int main(int argc, char* argv[]) {
-    // TODO add signal handler for Ctrl+C
-    // http://stackoverflow.com/questions/4217037/catch-ctrl-c-in-c
+// cleans the memory and exits
+void clean_exit(int code, struct state* state, pthread_t* threads) {
+    destroyState(state); // will call everything else
 
+    if(threads != NULL) {
+        free(threads);
+    }
+
+    exit(code);
+}
+
+int main(int argc, char* argv[]) {
     if(argc < 2) {
         fprintf(stderr, "Please provide the name of at least one student.\n");
         fprintf(stderr, "Usage: tutoring <student>...\n");
         fprintf(stderr, "<student>: Name of a student, name as many as you want (max. 10).\n");
-        return 1;
+
+        clean_exit(EXIT_FAILURE, NULL, NULL);
     }
 
     int num_students = argc - 1;
@@ -25,6 +35,7 @@ int main(int argc, char* argv[]) {
     struct state* state = newState();
     state->queue = newQueue();
     state->students = (struct student**)malloc((num_students) * sizeof(struct student*));
+    state->num_students = num_students;
     state->ta = newTA();
 
     // populate students
@@ -40,7 +51,7 @@ int main(int argc, char* argv[]) {
     int result = pthread_create(&ta_thread, NULL, taThread, (void*)state);
     if(result != 0) {
         fprintf(stderr, "Error creating a thread for the TA.\n");
-        exit(EXIT_FAILURE);
+        clean_exit(EXIT_FAILURE, state, NULL);
     }
 
     // launch students
@@ -56,7 +67,7 @@ int main(int argc, char* argv[]) {
         result = pthread_create(student_threads + i, NULL, studentThread, (void*)arg);
         if(result != 0) {
             fprintf(stderr, "Error creating a thread for student %s.\n", state->students[i]->name);
-            exit(EXIT_FAILURE);
+            clean_exit(EXIT_FAILURE, state, student_threads);
         }
     }
 
@@ -68,20 +79,7 @@ int main(int argc, char* argv[]) {
         pthread_join(student_threads[i], NULL);
     }
 
-    // then purge the TA, the students, and the entire world
-    sem_destroy(&state->ta->semaphore);
-    free(state->ta);
-    free(state->queue);
-    for(int i = 0; i < num_students; ++i) {
-        free(state->students[i]);
-    }
-    free(state);
-    free(student_threads);
+    clean_exit(EXIT_SUCCESS, state, student_threads);
 
     return 0;
 }
-
-// function for signal handler
-// global var to continue
-// global var to hold interrupt data
-// function to set interrupt data

@@ -19,4 +19,6 @@ struct student* newStudent(char* name);
 
 void* studentThread(void* arg);
 
+void destroyStudent(struct student* this);
+
 #endif

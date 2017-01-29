@@ -22,4 +22,6 @@ struct student* dequeue(struct queue* this);
 
 struct student* head(struct queue* this);
 
+void destroyQueue(struct queue* this);
+
 #endif
