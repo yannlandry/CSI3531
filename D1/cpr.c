@@ -19,8 +19,8 @@ int main(int argc, char* argv[]) {
     }
 
     // show up
-    char procbuf[128];
-    sprintf(procbuf, "I am process #%d.\n", num);
+    char procbuf[32];
+    sprintf(procbuf, "Processus %d commence.\n", num);
     write(1, procbuf, strlen(procbuf));
 
     // recurse
@@ -61,6 +61,13 @@ int main(int argc, char* argv[]) {
             wait(NULL);
         }
     }
+
+    if(num == 1) {
+        sleep(5);
+    }
+
+    sprintf(procbuf, "Processus %d termine.\n", num);
+    write(1, procbuf, strlen(procbuf));
 
     close(1);
 
