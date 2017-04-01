@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -10,14 +11,16 @@
 
 int main(int argc, char* argv[]) {
 	struct shared_block read = make_readable_block("tmp");
-	int* sequence = (int*)read.data;
+	uint64_t* sequence = (uint64_t*)read.data;
 
-	int size = read.size / sizeof(int);
+	int size = read.size / sizeof(uint64_t);
 	for(int i = 0; i < size; ++i) {
-		printf("%d ", sequence[i]);
+		printf("%lld ", (unsigned long long)sequence[i]);
 	}
 
 	printf("\n");
+
+	destroy_readable_block(read);
 
 	return 0;
 }

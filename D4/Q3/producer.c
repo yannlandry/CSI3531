@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -8,16 +9,19 @@
 
 #include "shared_block.h"
 
-int factorial(int n) {
-	int fact = 1;
-	for(; n > 0; --n) {
-		fact*= n;
-	}
-	return fact;
-}
+uint64_t catalan(int n) {
+	// 2n! / (n+1)! / n
+	int a = 2*n, b = n+1, c = n;
 
-int catalan(int n) {
-	return factorial(2*n) / factorial(n+1) / factorial(n);
+	uint64_t cat = 1;
+	for(; a > b; --a) {
+		cat*= a;
+	}
+	for(; c > 1; --c) {
+		cat/= c;
+	}
+
+	return cat;
 }
 
 int main(int argc, char* argv[]) {
@@ -32,16 +36,19 @@ int main(int argc, char* argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	struct shared_block write = make_writable_block("tmp", num * sizeof(int));
-	int* sequence = (int*)write.data;
+	struct shared_block write = make_writable_block("tmp", num * sizeof(uint64_t));
+	uint64_t* sequence = (uint64_t*)write.data;
 
-	for(int i = 1; i <= num; ++i) {
-		sequence[i-1] = catalan(i);
+	for(int i = 0; i < num; ++i) {
+		sequence[i] = catalan(i);
+		printf("produced %lld\n", (unsigned long long)sequence[i]);
 	}
 
 	printf("Production finished\n");
 	printf("Press any key to continue...");
 	getchar();
+
+	destroy_writable_block(write);
 
 	return 0;
 }

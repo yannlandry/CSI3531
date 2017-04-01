@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 struct shared_block {
+	const char* path;
 	int file;
 	int size;
 	char* data;
@@ -30,6 +31,7 @@ void allocate(int fd, size_t len) {
 struct shared_block make_writable_block(const char* filename, int size) {
 	// make block, compute sizes
 	struct shared_block block;
+	block.path = filename;
 	block.size = size;
 	int filesize = size + sizeof(int);
 
@@ -45,8 +47,14 @@ struct shared_block make_writable_block(const char* filename, int size) {
 	return block;
 }
 
+void destroy_writable_block(struct shared_block block) {
+	munmap(block.data, block.size + sizeof(int));
+	unlink(block.path);
+}
+
 struct shared_block make_readable_block(const char* filename) {
 	struct shared_block block;
+	block.path = filename;
 
 	// open file handle
 	block.file = open(filename, O_RDONLY);
@@ -66,6 +74,10 @@ struct shared_block make_readable_block(const char* filename) {
 	block.data = contents + sizeof(int);
 
 	return block;
+}
+
+void destroy_readable_block(struct shared_block block) {
+	munmap(block.data, block.size + sizeof(int));
 }
 
 #endif
