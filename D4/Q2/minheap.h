@@ -19,4 +19,6 @@ void heap_push(struct heap* h, struct page* value);
 
 struct page* heap_pop(struct heap* h);
 
+void heap_clean(struct heap* h);
+
 #endif

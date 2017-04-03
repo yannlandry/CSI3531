@@ -5,5 +5,6 @@ struct page new_page(int id) {
 	p.id = id;
 	p.present = 0;
 	p.entered = 0;
+	p.used = 0;
 	return p;
 }

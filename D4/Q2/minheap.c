@@ -71,3 +71,10 @@ struct page* heap_pop(struct heap* h) {
 
 	return removed;
 }
+
+void heap_clean(struct heap* h) {
+	h->count = 0;
+	h->size = 0;
+	free(h->heaparr);
+	h->heaparr = NULL;
+}

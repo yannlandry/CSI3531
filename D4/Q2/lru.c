@@ -7,12 +7,18 @@
 
 #define PHYS_MEM_SZ 5
 
+// keep track of # of pages in primary memory
+int count = 0;
+
 int min(int a, int b) {
 	return a < b ? a : b;
 }
 
 // returns 1 if there was a page fault
-int request_page(int id, struct page* table, struct heap* entrances, int time) {
+int request_page(int id, struct page* table, int time) {
+	// set use time
+	table[id].used = time;
+
 	// it's there, no page fault
 	if(table[id].present) {
 		return 0;
@@ -20,9 +26,19 @@ int request_page(int id, struct page* table, struct heap* entrances, int time) {
 	// otherwise bring it from memory
 
 	// if physical memory is full, find next page to remove, remove it
-	if(entrances->count == PHYS_MEM_SZ) {
-		int removed = heap_pop(entrances)->id;
+	if(count == PHYS_MEM_SZ) {
+		// find page here
+		// lru = least recent use
+		int lru = time, removed = 0;
+		for(int i = 0; i < 10; ++i) {
+			if(table[i].present && table[i].used < lru) {
+				lru = table[i].used;
+				removed = i;
+			}
+		}
+
 		table[removed].present = 0;
+		--count;
 
 		// only display a PF if replacing another page, because at the beginning
 		// no pages are in primary memory and we don't want to start with a bunch
@@ -32,8 +48,7 @@ int request_page(int id, struct page* table, struct heap* entrances, int time) {
 
 	// send page to primary memory, put into heap
 	table[id].present = 1;
-	table[id].entered = time;
-	heap_push(entrances, &table[id]);
+	++count;
 
 	return 1;
 }
@@ -47,25 +62,21 @@ int main(int argc, char* argv[]) {
 		table[i] = new_page(i);
 	}
 
-	// we store pages in primary memory in a heap
-	// so we always know which one to remove next
-	struct heap entrances = new_heap();
 	int faults = 0;
 
 	// run page-replacement simulation
 	int len = strlen(refstr);
 	for(int i = 0; i < len; ++i) {
-		faults+= request_page(refstr[i] - '0', table, &entrances, i);
+		faults+= request_page(refstr[i] - '0', table, i);
 	}
 
 	// none of the pages were in the primary memory at the beginning,
 	// so we offset the memory size to obtain a more accurate count
-	faults-= min(entrances.count, PHYS_MEM_SZ);
+	faults-= min(count, PHYS_MEM_SZ);
 	printf("There were %d page faults.\n", faults);
 
 	// clean up
 	free(refstr);
-	heap_clean(&entrances);
 
 	return 0;
 }
